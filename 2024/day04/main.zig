@@ -18,7 +18,7 @@ pub fn main() !void {
     const row_count: usize = list.items.len + 6;
     const column_count: usize = list.items[0].len + 6;
 
-    const grid = try array2d.create_empty(allocator, row_count, column_count);
+    const grid = try array2d.create_empty(u8, allocator, row_count, column_count);
 
     for (list.items, 0..) |line, n| {
         const dest = grid[n + 3][3..];

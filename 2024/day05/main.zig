@@ -6,21 +6,45 @@ const Rule = @import("rule.zig").Rule;
 const input = @embedFile("input.txt");
 
 pub fn main() !void {
-    var lines = std.mem.splitScalar(u8, input, '\n');
-    const part_one_total: usize = try part_one(&lines);
-
-    print("Part One: {d}", .{part_one_total});
+    print("Part One: {d}\n\n", .{try part_one()});
+    print("Part Two: {d}\n\n", .{try part_two()});
 }
 
-fn part_one(lines: *std.mem.SplitIterator(u8, .scalar)) !usize {
-    var l = lines;
+fn part_one() !usize {
+    var lines = std.mem.splitScalar(u8, input, '\n');
     var total: usize = 0;
-    const rules = try read_rules(l);
+    const rules = try read_rules(&lines);
 
-    line_loop: while (l.next()) |line| {
+    line_loop: while (lines.next()) |line| {
         const pages = try parse_pages(line);
         for (rules) |rule| {
             if (!rule.run(pages)) continue :line_loop;
+        }
+        const middle = ((pages.len - 1) / 2);
+        total += pages[middle];
+    }
+
+    return total;
+}
+
+fn part_two() !usize {
+    var lines = std.mem.splitScalar(u8, input, '\n');
+    var total: usize = 0;
+    const rules = try read_rules(&lines);
+
+    while (lines.next()) |line| {
+        const pages = try parse_pages(line);
+        var ok = true;
+        for (rules) |rule| {
+            ok = rule.run(pages) and ok;
+        }
+        if (ok) continue;
+        while (true) {
+            var fixed = false;
+            for (rules) |rule| {
+                fixed = rule.fix(pages) or fixed;
+            }
+            if (!fixed) break;
         }
         const middle = ((pages.len - 1) / 2);
         total += pages[middle];
